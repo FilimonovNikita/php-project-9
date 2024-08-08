@@ -6,18 +6,6 @@ use Slim\Factory\AppFactory;
 use DI\Container;
 use Slim\Middleware\MethodOverrideMiddleware;
 
-$app = AppFactory::create();
-$app->addErrorMiddleware(true, true, true);
-
-$app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim!');
-    return $response;
-    // Благодаря пакету slim/http этот же код можно записать короче
-    // return $response->write('Welcome to Slim!');
-});
-$app->run();
-
-/*
 session_start();
 
 $container = new Container();
@@ -35,9 +23,7 @@ $app->add(MethodOverrideMiddleware::class);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim!');
-    return $response;
-    // Благодаря пакету slim/http этот же код можно записать короче
-    // return $response->write('Welcome to Slim!');
+    $params = [];
+    return $this->get('renderer')->render($response, 'index.phtml', $params);
 });
-$app->run();*/
+$app->run();
