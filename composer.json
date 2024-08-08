@@ -1,5 +1,7 @@
 {
     "name": "hexlet/code",
+    "description": "3 project",
+    "license": "proprietary",
     "authors": [
         {
             "name": "Nikita Filimonov",
