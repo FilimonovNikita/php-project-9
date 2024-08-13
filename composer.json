@@ -8,6 +8,12 @@
             "email": "filimonovnikitav@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "PostgreSQL\\": "app/",
+            "PostgreSQLCreateTable\\": "app/"
+        }
+    },
     "require": {
         "slim/http": "^1.4",
         "slim/psr7": "^1.7",

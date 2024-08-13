@@ -19,7 +19,7 @@
                     <a class="nav-link active" aria-current="page" href="/">Главная</a>
                 </div>
                 <div class="navbar-nav">
-                    <a class="nav-link active" aria-current="page" href="/">Сайты(не забыть ссылку поменять)</a>
+                    <a class="nav-link active" aria-current="page" href="/urls">Сайты</a>
                 </div>
             </div>
         </div>
@@ -33,14 +33,21 @@
                     <form action="/urls" method = post class ="row" required>
                       <div class="col-8">
                         <label for="text" class="visually-hidden">Url для проверки</label>
-                        <input type="text" name="url[name]" value class="form-control form-control-lg" placeholder="https://www.example.com">
-                      </div>
+                        <input type="text"
+                               name="url[name]"
+                               value=""
+                               placeholder="https://www.example.com"
+                               class="form-control form-control-lg
+                                <?php if (isset($errors[0])) : ?>is-invalid<?php endif ?>">
+                                <?php if (isset($errors[0])) : ?>
+                                    <div class="invalid-feedback"><?= htmlspecialchars($errors[0]) ?></div>
+                                <?php endif ?>
+                        </div>
                       <div class="col-2">
                         <button class="btn btn-primary btn-lg ms-3 px-5 text-uppercase mx-3" type="submit">Проверить</button>
                       </div>
                     </form>
                 </div>
-
             </div>
         </div>
     </main>    
