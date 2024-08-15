@@ -65,11 +65,17 @@ class PostgreSQLCreateTable
         // возврат полученного значения id
         return $this->pdo->lastInsertId('urls_id_seq');
     }
-    public function insertUrlsChecks($urlsId)
+    public function insertUrlsChecks(array $data)
     {
-        $sql = "INSERT INTO url_checks(url_id, create_at) VALUES (:id, :create_at)";
+        $sql = "INSERT INTO url_checks(url_id, status_code, h1, title, description, name, create_at) 
+            VALUES (:id, :status_code, :h1, :title, :description, :name, :create_at)";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':id', $urlsId);
+        $stmt->bindValue(':id', $data['url_id'] ?? null);
+        $stmt->bindValue(':status_code', $data['status_code'] ?? null);
+        $stmt->bindValue(':h1', $data['h1'] ?? '');
+        $stmt->bindValue(':title', $data['title'] ?? '');
+        $stmt->bindValue(':description', $data['description'] ?? '');
+        $stmt->bindValue(':name', $data['name'] ?? '');
         $time = date('Y-m-d H:i:s');
         $stmt->bindValue(':create_at', $time);
 

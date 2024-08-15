@@ -7,21 +7,35 @@ use DI\Container;
 use Slim\Middleware\MethodOverrideMiddleware;
 use PostgreSQL\Connection;
 use PostgreSQL\PostgreSQLCreateTable;
+use Check\CheckUrl;
 
 session_start();
 putenv('DATABASE_URL=postgresql://user1:sql@localhost:5432/project9');
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->safeload();
+
 try {
     $pdo = Connection::get()->connect();
-    //echo 'A connection to the PostgreSQL database sever has been established successfully.';
-    $tableCreator = new PostgreSQLCreateTable($pdo);
 
-    // создание и запрос таблицы из
-    // базы данных
+    // Загрузка и выполнение SQL-файла для создания таблиц
+    $sqlFile = __DIR__ . '/../database.sql';
+    if (file_exists($sqlFile)) {
+        $sql = file_get_contents($sqlFile);
+        $pdo->exec($sql);
+    } else {
+        echo "SQL file not found.";
+    }
+
+    // Создание и запрос таблицы из базы данных
+    $tableCreator = new PostgreSQLCreateTable($pdo);
     $tables = $tableCreator->createTables();
-    //print ('1');
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
+
+const MAIN_PAGE = "MAIN_PAGE";
+const SITES_PAGE = "SITES_PAGE";
 
 $container = new Container();
 $container->set('pdo', function () use ($pdo) {
@@ -48,7 +62,7 @@ $container->set('router', function () use ($app) {
 
 
 $app->get('/', function ($request, $response) {
-    $errors = $_SESSION['errors'];
+    $errors = $_SESSION['errors'] ?? '';
     $params = ['errors' => $errors];
     return $this->get('renderer')->render($response, 'index.phtml', $params);
 })->setName('home');
@@ -105,7 +119,6 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
             'created_at' => $dataUrl[0]['create_at'],
             'flash' => $flash,
             'dataUrlCheks' => $dataUrlCheks];
-
     return $this->get('renderer')->render($response, 'urls/show.phtml', $params);
 })->setName('currentUrl');
 
@@ -113,10 +126,40 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
 
 $app->post('/urls/{id}/checks', function ($request, $response, $args) {
     $id = $args["id"];
+
     $databse = $this->get('pdo');
     $lastUrl = new PostgreSQLCreateTable($databse);
-    $lasId = $lastUrl->insertUrlsChecks($id);
+    $dataUrl = $lastUrl->getURLData($id);
+    $urlCheck = new CheckUrl();
+    $connect = $urlCheck->checkUrlConnect($dataUrl[0]['name']);
+    if (isset($connect['ConnectException'])) {
+        $this->get('flash')->addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
+    } elseif (isset($connect['ClientException'])) {
+        $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
+        $time = date('Y-m-d H:i:s');
+        $result = [
+            'url_id' => $dataUrl[0]['id'],
+            'status_code' => $connect['status'],
+            'h1' => 'Доступ ограничен: проблема с IP',
+            'title' => 'Доступ ограничен: проблема с IP',
+            'description' => 'Доступ ограничен: проблема с IP',
+            'name' => $dataUrl[0]['name'],
+            'create_at' => $timeъ];
+        $lasId = $lastUrl->insertUrlsChecks($result);
+    } else {
+        $data = $urlCheck->getUrlCheckData($dataUrl[0]['name']);
+        $this->get('flash')->addMessage('success', "Страница успешно проверена");
 
+        $result = [
+            'url_id' => $dataUrl[0]['id'],
+            'status_code' => $data['statusCode'],
+            'h1' => $data['id'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'name' => $dataUrl[0]['name'],
+            'create_at' => $data['create_at']];
+        $lasId = $lastUrl->insertUrlsChecks($result);
+    }
     $curUrl = $this->get('router')->urlFor('currentUrl', ['id' => $id]);
     return $response->withHeader('Location', $curUrl)->withStatus(302);
 });

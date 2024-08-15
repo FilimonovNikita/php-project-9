@@ -32,7 +32,7 @@
                                 <?= htmlspecialchars($value['name'] ?? '') ?></td>
                             </a>
                         <td><?=  htmlspecialchars($value["create_at"] ?? '') ?></td>
-                        <td><?= 'Заглушка' ?></td>
+                        <td><?= htmlspecialchars($value["status_code"] ?? '') ?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>
