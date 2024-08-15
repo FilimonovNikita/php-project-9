@@ -31,7 +31,7 @@
                             <a href="<?= '/urls/' . htmlspecialchars($value['id'] ?? '') ?>">
                                 <?= htmlspecialchars($value['name'] ?? '') ?></td>
                             </a>
-                        <td><?= 'Заглушка' ?></td>
+                        <td><?=  htmlspecialchars($value["create_at"] ?? '') ?></td>
                         <td><?= 'Заглушка' ?></td>
                     </tr>
                 <?php endforeach ?>

@@ -29,11 +29,24 @@ class PostgreSQLCreateTable
     {
         $sql = 'CREATE TABLE IF NOT EXISTS urls (
                 id SERIAL PRIMARY KEY, 
-                name VARCHAR (255), 
+                name VARCHAR (255) UNIQUE NOT NULL, 
                 create_at timestamp
         )';
 
         $this->pdo->exec($sql);
+
+        $sql2 = 'CREATE TABLE IF NOT EXISTS url_checks (
+            id SERIAL PRIMARY KEY,
+            url_id int REFERENCES urls (id),
+            status_code int,
+            h1 VARCHAR (255),
+            title VARCHAR (255),
+            description VARCHAR (255),
+            name VARCHAR (255), 
+            create_at timestamp
+        )';
+
+        $this->pdo->exec($sql2);
 
         return $this;
     }
@@ -51,6 +64,18 @@ class PostgreSQLCreateTable
 
         // возврат полученного значения id
         return $this->pdo->lastInsertId('urls_id_seq');
+    }
+    public function insertUrlsChecks($urlsId)
+    {
+        $sql = "INSERT INTO url_checks(url_id, create_at) VALUES (:id, :create_at)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':id', $urlsId);
+        $time = date('Y-m-d H:i:s');
+        $stmt->bindValue(':create_at', $time);
+
+        $stmt->execute();
+
+        return $this->pdo->lastInsertId('url_checks_id_seq');
     }
     public function validateUrls($url) //проверяет url на корректность, если есть в базе возравщает id
     {
@@ -81,12 +106,30 @@ class PostgreSQLCreateTable
         $result = $stmt->fetchAll();
         return $result;
     }
-    public function getAllData()
+    public function getAllLastCheksData()
     {
-        $sql = "SELECT * FROM urls";  // Запасной вариант, если можно использовать другой SQL-запрос
+        $sql = "
+        SELECT ur1.id, ur1.name, ur2.create_at, ur2.status_code 
+        FROM urls AS ur1
+        LEFT JOIN url_checks AS ur2 ON ur1.id = ur2.url_id 
+        AND ur2.create_at = (
+            SELECT MAX(uc2.create_at)
+            FROM url_checks AS uc2
+            WHERE uc2.url_id = ur1.id
+        ) ORDER BY ur1.id DESC
+        ";
         $stmt = $this->pdo->query($sql);
         $result = $stmt->fetchAll();
-        print_r($result);
+        return $result;
+    }
+    public function getUrlChecksData($id)
+    {
+        $sql = "SELECT * FROM url_checks WHERE url_id=:id ORDER BY id DESC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+
         return $result;
     }
 }

@@ -53,13 +53,12 @@ $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml', $params);
 })->setName('home');
 
+////////////////////     /urls     ////////////////////
+
 $app->get('/urls', function ($request, $response) {
     $pdo = $this->get('pdo');
     $insertUrl = new PostgreSQLCreateTable($pdo);
-    $allData = $insertUrl->getAllData();
-    usort($allData, function ($a, $b) {
-        return $b['id'] <=> $a['id'];
-    });
+    $allData = $insertUrl->getAllLastCheksData();
     $params = [
         'data' => $allData
         ];
@@ -91,28 +90,35 @@ $app->post('/urls', function ($request, $response) {
     }
 })->setName('insertUrl');
 
+////////////////////     /urls/{id}     ////////////////////
+
 $app->get('/urls/{id}', function ($request, $response, $args) {
     $flash = $this->get('flash')->getMessages();
     $databse = $this->get('pdo');
     $id = $args['id'];
     $lastUrl = new PostgreSQLCreateTable($databse);
     $dataUrl = $lastUrl->getURLData($id);
+    $dataUrlCheks = $lastUrl->getUrlChecksData($id);
     $params = [
             'id' => $dataUrl[0]['id'],
             'name' => $dataUrl[0]['name'],
             'created_at' => $dataUrl[0]['create_at'],
-            'flash' => $flash];
+            'flash' => $flash,
+            'dataUrlCheks' => $dataUrlCheks];
 
     return $this->get('renderer')->render($response, 'urls/show.phtml', $params);
 })->setName('currentUrl');
 
-$app->get('/routes', function ($request, $response, $args) {
-    /*$routes = $this->getRouteCollector()->getRoutes();
-    foreach ($routes as $route) {
-        echo $route->getPattern() . "<br>";
-    }*/
-    print ('Hellow');
-    return $response;
+////////////////////     /urls{id}/checks     ////////////////////
+
+$app->post('/urls/{id}/checks', function ($request, $response, $args) {
+    $id = $args["id"];
+    $databse = $this->get('pdo');
+    $lastUrl = new PostgreSQLCreateTable($databse);
+    $lasId = $lastUrl->insertUrlsChecks($id);
+
+    $curUrl = $this->get('router')->urlFor('currentUrl', ['id' => $id]);
+    return $response->withHeader('Location', $curUrl)->withStatus(302);
 });
 
 $app->run();

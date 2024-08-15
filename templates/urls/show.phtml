@@ -35,7 +35,7 @@
                 <input type="submit" class="btn btn-primary" value="Запустить проверку">
             </form>
             <table class="table table-bordered table-hover text-nowrap" data-test="url">
-                <tbody>
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Код ответа</th>
@@ -44,7 +44,31 @@
                         <th>description</th>
                         <th>Дата создания</th>
                     </tr>
-                </tbody>
+                </thead>
+                    
+                    <?php foreach ($dataUrlCheks as $value):?>
+                        <tr>  
+                            <th>
+                                <?= $value['id'] ?>
+                            </th>
+                            <th>
+                                Заглушка
+                            </th>
+                            <th>
+                                Заглушка
+                            </th>
+                            <th>
+                                Заглушка
+                            </th>
+                            <th>
+                                Заглушка
+                            </th>
+                            <th>
+                                <?= $value['create_at'] ?>
+                            </th>
+                        </tr>
+                    <?php endforeach?>
+                    
             </table>
         </div>
     </main>
