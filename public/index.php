@@ -149,11 +149,11 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
         $result = [
             'url_id' => $dataUrl[0]['id'],
             'status_code' => $data['statusCode'],
-            'h1' => $data['id'],
+            'h1' => $data['h1'],
             'title' => $data['title'],
             'description' => $data['description'],
             'name' => $dataUrl[0]['name'],
-            'create_at' => $data['create_at']];
+            'create_at' => $dataUrl[0]['create_at']];
         $lasId = $lastUrl->insertUrlsChecks($result);
     }
     $curUrl = $this->get('router')->urlFor('currentUrl', ['id' => $id]);
