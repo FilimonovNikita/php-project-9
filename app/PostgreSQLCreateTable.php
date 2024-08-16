@@ -82,25 +82,34 @@ class PostgreSQLCreateTable
 
         return $this->pdo->lastInsertId('url_checks_id_seq');
     }
-    public function validateUrls($url) //проверяет url на корректность, если есть в базе возравщает id
+    public function validateUrls($url)
     {
-        $sql = "SELECT id FROM urls WHERE name=:url";
+        $sql = "SELECT id FROM urls WHERE name = :url";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':url', $url);
         $stmt->execute();
-        $id = $stmt->fetchAll();
-
+        $id = $stmt->fetchColumn();
+    
         $errors = [];
+    
         if (strlen($url) < 1) {
             $errors[] = 'URL не должен быть пустым';
         } elseif (strlen($url) > 255) {
-            $errors[] = 'Длина превышает 255';
-        } elseif (!filter_var($url, FILTER_VALIDATE_URL)) {
+            $errors[] = 'Длина превышает 255 символов';
+        } elseif (!$this->isValidUrl($url)) {
             $errors[] = "Некорректный URL";
-        } elseif (!empty($id)) {
+        } elseif ($id !== false) {
             return $id;
         }
-        return $errors;
+    
+        return !empty($errors) ? $errors : null;
+    }
+    public function isValidUrl($url) {
+        $parsedUrl = parse_url($url);
+        if (!$parsedUrl || !in_array($parsedUrl['scheme'], ['http', 'https'])) {
+            return false;
+        }
+        return filter_var($url, FILTER_VALIDATE_URL) !== false;
     }
     public function getUrlData($id)
     {
