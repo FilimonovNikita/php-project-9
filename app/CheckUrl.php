@@ -11,10 +11,10 @@ class CheckUrl
 {
     public function checkUrlConnect($url): array
     {
+        $result = [];
         try {
             $client = new Client();
             $req = $client->request("GET", $url);
-            $result = [];
         } catch (ConnectException $e) {
             $result["ConnectException"] = 'Произошла ошибка при проверке, не удалось подключиться';
             return $result;
@@ -24,8 +24,8 @@ class CheckUrl
                 $result["ClientException"] = 'Проверка была выполнена успешно, но сервер ответил с ошибкой';
                 return $result;
             }
-            return $result;
         }
+        return $result;
     }
     public function getUrlCheckData(string $url): array
     {
