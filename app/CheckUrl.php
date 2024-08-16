@@ -37,7 +37,7 @@ function optional(?object $value): object
 }
 class CheckUrl
 {
-    public function checkUrlConnect($url): array
+    public function checkUrlConnect(string $url): array
     {
         $result = [];
         try {
@@ -63,9 +63,14 @@ class CheckUrl
         $statusCode = $res->getStatusCode();
         $document = new Document($res->getBody()->getContents(), false);
 
-        $h1 = optional($document->first('h1'))->text();
-        $title = optional($document->first('title'))->text();
-        $description = optional($document->first('meta[name=description]'))->content;
+        $h1Element = $document->first('h1');
+        $h1 = $h1Element ? $h1Element->text() : null;
+
+        $titleElement = $document->first('title');
+        $title = $titleElement ? $titleElement->text() : null;
+
+        $descriptionElement = $document->first('meta[name=description]');
+        $description = $descriptionElement ? $descriptionElement->getAttribute('content') : null;
 
         $result = [
             'statusCode' => $statusCode,
