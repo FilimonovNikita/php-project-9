@@ -102,7 +102,8 @@ class PostgreSQLCreateTable
         }
         return $errors;
     }
-    function isValidUrl($url) {
+    public function isValidUrl($url)
+    {
         $parsedUrl = parse_url($url);
         if (!$parsedUrl || !in_array($parsedUrl['scheme'], ['http', 'https'])) {
             return false;
