@@ -56,7 +56,6 @@ $container->set('router', function () use ($app) {
     return $router;
 });
 
-
 $app->get('/', function ($request, $response) {
     $errors = $_SESSION['errors'] ?? '';
     $params = ['errors' => $errors];
