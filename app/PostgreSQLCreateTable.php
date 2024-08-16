@@ -89,9 +89,7 @@ class PostgreSQLCreateTable
         $stmt->bindParam(':url', $url);
         $stmt->execute();
         $id = $stmt->fetchColumn();
-    
         $errors = [];
-    
         if (strlen($url) < 1) {
             $errors[] = 'URL не должен быть пустым';
         } elseif (strlen($url) > 255) {
@@ -101,10 +99,10 @@ class PostgreSQLCreateTable
         } elseif ($id !== false) {
             return $id;
         }
-    
         return !empty($errors) ? $errors : null;
     }
-    public function isValidUrl($url) {
+    public function isValidUrl($url)
+    {
         $parsedUrl = parse_url($url);
         if (!$parsedUrl || !in_array($parsedUrl['scheme'], ['http', 'https'])) {
             return false;
