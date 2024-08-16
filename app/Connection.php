@@ -22,16 +22,16 @@ final class Connection
     {
         if (getenv('DATABASE_URL')) {
             $params = parse_url(getenv('DATABASE_URL'));
-        } else {
+        } /*else {
             throw new \Exception("Error reading database configuration url");
-        }
+        }*/
 
         // подключение к базе данных postgresql
-        $username = $params['user'];
-        $password = $params['pass'];
-        $host = $params['host'];
-        $port = $params['port'];
-        $dbName = ltrim($params['path'], '/');
+        $username = $params['user'] ?? 'user1';
+        $password = $params['pass'] ?? 'sql';
+        $host = $params['host'] ?? "localhost";
+        $port = $params['port'] ?? 5432;
+        $dbName = isset($params['path']) ? ltrim($params['path'], '/') : 'project9';
 
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",

@@ -10,45 +10,28 @@ use PostgreSQL\PostgreSQLCreateTable;
 use Check\CheckUrl;
 
 session_start();
-// Загружаем переменные окружения из .env файла
+
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeload();
 
-$appEnv = $_ENV['APP_ENV'] ?? 'local';
-
-// Настройка базы данных в зависимости от окружения
-if ($appEnv === 'production') {
-    $databaseUrl = parse_url($_ENV['DATABASE_URL']);
-} else {
-    // Локальные настройки базы данных
-    $databaseUrl = [
-        'user' => 'user1',
-        'pass' => 'sql',
-        'host' => 'localhost',
-        'port' => '5432',
-        'path' => 'project9',
-    ];
-}
-
-// Извлекаем отдельные компоненты
-$username = $databaseUrl['user'];
-$password = $databaseUrl['pass'];
-$host = $databaseUrl['host'];
-$port = $databaseUrl['port'];
-$dbName = ltrim($databaseUrl['path'], '/');
-
-// Формируем строку DSN для подключения к PostgreSQL
-$dsn = "pgsql:host=$host;port=$port;dbname=$dbName";
-
 try {
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-}
+    $pdo = Connection::get()->connect();
 
-const MAIN_PAGE = "MAIN_PAGE";
-const SITES_PAGE = "SITES_PAGE";
+    // Загрузка и выполнение SQL-файла для создания таблиц
+    $sqlFile = __DIR__ . '/../database.sql';
+    if (file_exists($sqlFile)) {
+        $sql = file_get_contents($sqlFile);
+        $pdo->exec($sql);
+    } else {
+        echo "SQL file not found.";
+    }
+
+    // Создание и запрос таблицы из базы данных
+    $tableCreator = new PostgreSQLCreateTable($pdo);
+    $tables = $tableCreator->createTables();
+} catch (\PDOException $e) {
+    echo $e->getMessage();
+}
 
 $container = new Container();
 $container->set('pdo', function () use ($pdo) {

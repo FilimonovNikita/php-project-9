@@ -55,7 +55,6 @@ class PostgreSQLCreateTable
         // подготовка запроса для добавления данных
         $sql = 'INSERT INTO urls(name, create_at) VALUES(:urls, :create_at)';
         $stmt = $this->pdo->prepare($sql);
-        print ($urls);
         $stmt->bindValue(':urls', $urls);
         $time = date('Y-m-d H:i:s');
         $stmt->bindValue(':create_at', $time);
