@@ -52,7 +52,7 @@ class PostgreSQLCreateTable
 
         return $this;
     }
-    public function insertUrls($urls): string
+    public function insertUrls(string $urls): string
     {
         // подготовка запроса для добавления данных
         $sql = 'INSERT INTO urls(name, create_at) VALUES(:urls, :create_at)';
@@ -84,7 +84,7 @@ class PostgreSQLCreateTable
 
         return $this->pdo->lastInsertId('url_checks_id_seq');
     }
-    public function validateUrls($url): array
+    public function validateUrls(string $url): array
     {
         // Инициализация Valitron Validator
         $v = new Validator(['name' => $url]);

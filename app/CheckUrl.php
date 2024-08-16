@@ -7,18 +7,18 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use DiDom\Document;
 
-function optional($value)
+function optional(?object $value): object
 {
     return new class ($value)
     {
-        protected $value;
+        protected ?object $value;
 
-        public function __construct($value)
+        public function __construct(?object $value)
         {
             $this->value = $value;
         }
 
-        public function __call($method, $args)
+        public function __call(string $method, array $args): mixed
         {
             if (is_null($this->value)) {
                 return null;
@@ -26,7 +26,7 @@ function optional($value)
             return $this->value->{$method}(...$args);
         }
 
-        public function __get($property)
+        public function __get(string $property): mixed
         {
             if (is_null($this->value)) {
                 return null;
