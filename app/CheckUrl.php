@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use DiDom\Document;
+use DiDom\Element;
 
 function optional(?object $value): object
 {
@@ -64,13 +65,13 @@ class CheckUrl
         $document = new Document($res->getBody()->getContents(), false);
 
         $h1Element = $document->first('h1');
-        $h1 = $h1Element ? $h1Element->text() : null;
+        $h1 = $h1Element instanceof Element ? $h1Element->text() : null;
 
         $titleElement = $document->first('title');
-        $title = $titleElement ? $titleElement->text() : null;
+        $title = $titleElement instanceof Element ? $titleElement->text() : null;
 
         $descriptionElement = $document->first('meta[name=description]');
-        $description = $descriptionElement ? $descriptionElement->getAttribute('content') : null;
+        $description = $descriptionElement instanceof Element ? $descriptionElement->getAttribute('content') : null;
 
         $result = [
             'statusCode' => $statusCode,
