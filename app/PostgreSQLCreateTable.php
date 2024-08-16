@@ -2,6 +2,8 @@
 
 namespace PostgreSQL;
 
+use Valitron\Validator;
+
 /**
  * Создание в PostgreSQL таблицы из демонстрации PHP
  */
@@ -82,33 +84,40 @@ class PostgreSQLCreateTable
 
         return $this->pdo->lastInsertId('url_checks_id_seq');
     }
-    public function validateUrls($url) //проверяет url на корректность, если есть в базе возравщает id
+    public function validateUrls($url)
     {
+        // Инициализация Valitron Validator
+        $v = new Validator(['name' => $url]);
+
+        // Добавление правил валидации
+        $v->rule('required', 'name')->message('URL не должен быть пустым');
+        $v->rule('lengthMax', 'name', 255)->message('Длина превышает 255 символов');
+        $v->rule('url', 'name')->message('Некорректный URL');
+
+        // Выполнение валидации
+        if (!$v->validate()) {
+            // Собираем все ошибки в один массив, как раньше
+            $errors = [];
+            foreach ($v->errors() as $fieldErrors) {
+                foreach ($fieldErrors as $error) {
+                    $errors[] = $error;
+                }
+            }
+            return $errors;
+        }
+
+        // Проверка в базе данных
         $sql = "SELECT id FROM urls WHERE name=:url";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':url', $url);
         $stmt->execute();
         $id = $stmt->fetchAll();
 
-        $errors = [];
-        if (strlen($url) < 1) {
-            $errors[] = 'URL не должен быть пустым';
-        } elseif (strlen($url) > 255) {
-            $errors[] = 'Длина превышает 255';
-        } elseif (!$this->isValidUrl($url)) {
-            $errors[] = "Некорректный URL";
-        } elseif (!empty($id)) {
-            return $id;
+        if (!empty($id)) {
+            return $id; // Возвращаем id, если URL существует в базе данных
         }
-        return $errors;
-    }
-    public function isValidUrl($url)
-    {
-        $parsedUrl = parse_url($url);
-        if (!$parsedUrl || !in_array($parsedUrl['scheme'], ['http', 'https'])) {
-            return false;
-        }
-        return filter_var($url, FILTER_VALIDATE_URL) !== false;
+
+        return []; // Если нет ошибок и URL не найден в базе данных, возвращаем пустой массив
     }
     public function getUrlData($id)
     {

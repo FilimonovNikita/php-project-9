@@ -79,6 +79,7 @@ $app->post('/urls', function ($request, $response) {
     $pdo = $this->get('pdo');
     $insertUrl = new PostgreSQLCreateTable($pdo);
     $validateResult = $insertUrl->validateUrls($url);
+    var_dump($validateResult);
 
     if (isset($validateResult[0]['id'])) {
         $this->get('flash')->addMessage('success', "Страница уже существует");
