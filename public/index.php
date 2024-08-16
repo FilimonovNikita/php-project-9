@@ -79,7 +79,6 @@ $app->post('/urls', function ($request, $response) {
     $pdo = $this->get('pdo');
     $insertUrl = new PostgreSQLCreateTable($pdo);
     $validateResult = $insertUrl->validateUrls($url);
-    var_dump($validateResult);
 
     if (isset($validateResult[0]['id'])) {
         $this->get('flash')->addMessage('success', "Страница уже существует");
@@ -95,8 +94,8 @@ $app->post('/urls', function ($request, $response) {
         $curUrl = $this->get('router')->urlFor('currentUrl', ['id' => $id]);
         return $response->withHeader('Location', $curUrl)->withStatus(302);
     } elseif (!empty($validateResult)) {
-        $_SESSION['errors'] = $validateResult;
-        return $response->withHeader('Location', '/')->withStatus(302);
+        $params = ['errors' => $validateResult];
+        return $this->get('renderer')->render($response->withStatus(422), 'index.phtml', $params);
     }
 })->setName('insertUrl');
 
