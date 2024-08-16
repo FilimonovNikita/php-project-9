@@ -9,7 +9,7 @@ use DiDom\Document;
 
 class CheckUrl
 {
-    public function checkUrlConnect($url)
+    public function checkUrlConnect($url): array
     {
         try {
             $client = new Client();
@@ -24,24 +24,34 @@ class CheckUrl
                 $result["ClientException"] = 'Проверка была выполнена успешно, но сервер ответил с ошибкой';
                 return $result;
             }
-            return [$result];
+            return $result;
         }
     }
-    public function getUrlCheckData($url)
+    public function getUrlCheckData(string $url): array
     {
         $client = new Client();
         $res = $client->request("GET", $url);
+
         $statusCode = $res->getStatusCode();
         $document = new Document($res->getBody()->getContents(), false);
-        $title = $document->first('title') ? $document->first('title')->text() : '';
-        $h1 = $document->first('h1') ? $document->first('h1')->text() : '';
-        $description = $document->first('meta[name="description"]') ?
-            $document->first('meta[name="description"]')->getAttribute('content') : '';
-        $result = [
+
+        // Проверка и работа с элементом title
+        $titleElement = $document->first('title');
+        $title = ($titleElement instanceof Element) ? $titleElement->text() : '';
+
+        // Проверка и работа с элементом h1
+        $h1Element = $document->first('h1');
+        $h1 = ($h1Element instanceof Element) ? $h1Element->text() : '';
+
+        // Проверка и работа с элементом meta[name="description"]
+        $descriptionElement = $document->first('meta[name="description"]');
+        $description = ($descriptionElement instanceof Element) ? $descriptionElement->getAttribute('content') : '';
+
+        return [
             'statusCode' => $statusCode,
             'title' => $title,
             'h1' => $h1,
-            'description' => $description];
-        return $result;
+            'description' => $description
+        ];
     }
 }

@@ -19,7 +19,7 @@ class PostgreSQLCreateTable
      * инициализация объекта с объектом \PDO
      * @тип параметра $pdo
      */
-    public function __construct($pdo)
+    public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
     }
@@ -52,7 +52,7 @@ class PostgreSQLCreateTable
 
         return $this;
     }
-    public function insertUrls($urls)
+    public function insertUrls($urls): string
     {
         // подготовка запроса для добавления данных
         $sql = 'INSERT INTO urls(name, create_at) VALUES(:urls, :create_at)';
@@ -84,7 +84,7 @@ class PostgreSQLCreateTable
 
         return $this->pdo->lastInsertId('url_checks_id_seq');
     }
-    public function validateUrls($url)
+    public function validateUrls($url): array
     {
         // Инициализация Valitron Validator
         $v = new Validator(['name' => $url]);
@@ -98,9 +98,12 @@ class PostgreSQLCreateTable
         if (!$v->validate()) {
             // Собираем все ошибки в один массив, как раньше
             $errors = [];
-            foreach ($v->errors() as $fieldErrors) {
-                foreach ($fieldErrors as $error) {
-                    $errors[] = $error;
+            $validationErrors = $v->errors();
+            if (is_array($validationErrors)) {
+                foreach ($validationErrors as $fieldErrors) {
+                    foreach ($fieldErrors as $error) {
+                        $errors[] = $error;
+                    }
                 }
             }
             return $errors;
@@ -119,7 +122,7 @@ class PostgreSQLCreateTable
 
         return []; // Если нет ошибок и URL не найден в базе данных, возвращаем пустой массив
     }
-    public function getUrlData($id)
+    public function getUrlData(int $id): array
     {
         $sql = "SELECT * FROM urls WHERE id = :id ";
         $stmt = $this->pdo->prepare($sql);
@@ -144,7 +147,7 @@ class PostgreSQLCreateTable
         $result = $stmt->fetchAll();
         return $result;
     }
-    public function getUrlChecksData($id)
+    public function getUrlChecksData(int $id): array
     {
         $sql = "SELECT * FROM url_checks WHERE url_id=:id ORDER BY id DESC";
         $stmt = $this->pdo->prepare($sql);

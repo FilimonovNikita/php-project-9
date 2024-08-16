@@ -14,6 +14,8 @@ session_start();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeload();
 
+$pdo = null;
+
 try {
     $pdo = Connection::get()->connect();
 
@@ -34,9 +36,15 @@ try {
 }
 
 $container = new Container();
-$container->set('pdo', function () use ($pdo) {
-    return $pdo;
-});
+if ($pdo !== null) {
+    $container = new Container();
+    $container->set('pdo', function () use ($pdo) {
+        return $pdo;
+    });
+} else {
+    // Обработка ситуации, если $pdo не инициализирован
+    echo "PDO connection could not be established.";
+}
 $container->set('renderer', function () {
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
 });
@@ -93,7 +101,7 @@ $app->post('/urls', function ($request, $response) {
 
         $curUrl = $this->get('router')->urlFor('currentUrl', ['id' => $id]);
         return $response->withHeader('Location', $curUrl)->withStatus(302);
-    } elseif (!empty($validateResult)) {
+    } else {
         $params = ['errors' => $validateResult];
         return $this->get('renderer')->render($response->withStatus(422), 'index.phtml', $params);
     }
@@ -139,7 +147,7 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) {
             'title' => 'Доступ ограничен: проблема с IP',
             'description' => 'Доступ ограничен: проблема с IP',
             'name' => $dataUrl[0]['name'],
-            'create_at' => $timeъ];
+            'create_at' => $time];
         $lasId = $lastUrl->insertUrlsChecks($result);
     } else {
         $data = $urlCheck->getUrlCheckData($dataUrl[0]['name']);
