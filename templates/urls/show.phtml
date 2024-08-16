@@ -37,7 +37,7 @@
                 </table>
             </div>
             <h2 class="mt-5 mb-3">Проверки</h2>
-            <form method='post' action="/urls/<?=$id?>/checks">
+            <form method='post' action="/urls/<?=$id?>/checks" class="mb-3">
                 <input type="submit" class="btn btn-primary" value="Запустить проверку">
             </form>
             <table class="table table-bordered table-hover" data-test="checks">
@@ -54,24 +54,24 @@
                 <tbody>
                     <?php foreach ($dataUrlCheks as $value):?>
                         <tr>  
-                            <th>
+                            <td>
                                 <?= htmlspecialchars($value['id'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <?= htmlspecialchars($value['status_code'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <?= htmlspecialchars($value['h1'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <?= htmlspecialchars($value['title'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <?= htmlspecialchars($value['description'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <?= htmlspecialchars($value['create_at'], ENT_QUOTES, 'UTF-8') ?>
-                            </th>
+                            </td>
                         </tr>
                     <?php endforeach?>
                 </tbody>
